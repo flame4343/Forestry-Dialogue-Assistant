@@ -6,7 +6,7 @@ A lightweight, modular dialogue system designed for forestry-related conversatio
 
 ## 📸 Screenshot
 
-![Forestry Dialogue Assistant UI](./7859b83b-4caa-457f-8676-27f366f19d0c.png)
+![Forestry Dialogue Assistant UI](./1.png)
 
 ---
 
