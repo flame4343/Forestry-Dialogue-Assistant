@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>人工智能小助手</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #f7f7f7;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h2 {
+      color: #333;
+      font-size: 26px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header p {
+      color: #555;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    label {
+      display: inline-block;
+      width: 130px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    input[type="number"],
+    select {
+      padding: 5px 8px;
+      margin: 5px;
+      width: 130px;
+    }
+
+    #chat {
+      border: 1px solid #ccc;
+      background-color: #fff;
+      padding: 15px;
+      height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      font-family: monospace;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    #prompt {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+
+    .btns {
+      text-align: right;
+      margin-top: 8px;
+    }
+
+    button {
+      padding: 6px 14px;
+      margin-left: 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .control-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 20px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .param-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 20px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h2><span>🌳</span>我是人工智能小助手</h2>
+    <p>我可以帮你写代码、答问题、扯废话，请尽情为难我吧~</p>
+  </div>
+
+  <div class="control-section">
+    <label for="model_type">模型选择：</label>
+    <select id="model_type">
+      <option value="dpo" selected>DPO 模型</option>
+      <option value="sft">SFT 模型</option>
+      <option value="instruct">Instruct 模型</option>
+    </select>
+  </div>
+
+  <div class="param-group">
+    <label>max_new_tokens：</label><input type="number" id="max_new_tokens" value="512">
+    <label>temperature：</label><input type="number" step="0.1" id="temperature" value="0.7">
+  </div>
+
+  <div class="param-group">
+    <label>top_p：</label><input type="number" step="0.1" id="top_p" value="0.9">
+    <label>top_k：</label><input type="number" id="top_k" value="50">
+  </div>
+
+  <div id="chat"></div>
+
+  <input type="text" id="prompt" placeholder="请输入问题..." />
+  <div class="btns">
+    <button onclick="send()">发送</button>
+    <button onclick="clearChat()">清空</button>
+  </div>
+
+  <script>
+    function getNowTime() {
+      const now = new Date();
+      return now.toTimeString().split(' ')[0]; // hh:mm:ss
+    }
+
+    async function send() {
+      const prompt = document.getElementById("prompt").value.trim();
+      if (!prompt) return;
+
+      const chat = document.getElementById("chat");
+      const model_type = document.getElementById("model_type").value;
+      const max_new_tokens = parseInt(document.getElementById("max_new_tokens").value);
+      const temperature = parseFloat(document.getElementById("temperature").value);
+      const top_p = parseFloat(document.getElementById("top_p").value);
+      const top_k = parseInt(document.getElementById("top_k").value);
+
+      const time = getNowTime();
+      chat.innerHTML += `🧑‍💻 你 [${time}]: ${prompt}\n`;
+      chat.scrollTop = chat.scrollHeight;
+
+      const start = Date.now(); // 记录开始时间
+
+      const res = await fetch("/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt,
+          model_type,
+          max_new_tokens,
+          temperature,
+          top_p,
+          top_k
+        })
+      });
+
+      const duration = ((Date.now() - start) / 1000).toFixed(2); // 用时秒数
+      const data = await res.json();
+      const replyTime = getNowTime();
+
+      chat.innerHTML += `🤖 AI [${replyTime}]: ${data.response}（用时 ${duration} 秒）\n\n`;
+      document.getElementById("prompt").value = "";
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function clearChat() {
+      document.getElementById("chat").innerHTML = "";
+    }
+  </script>
+</body>
+</html>
