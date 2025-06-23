@@ -1,7 +1,8 @@
-from openai import OpenAI
+import openai
 
-key = '自己去钥匙'
-client = OpenAI(api_key=key, base_url="https://api.deepseek.com")
+# 设置 API 密钥和 API 基地址（注意 DeepSeek 需要 /v1）
+openai.api_key = "自己的钥匙"
+openai.api_base = "https://api.deepseek.com/v1"
 
 
 content ="""【角色】
@@ -45,17 +46,17 @@ message = """行程信息":"非通勤路线、非休闲线路 、非夜间行驶
 "常规播报内容": "前方200米有闯红灯和压线拍照"
 "播报点个性化信息":"违规驾驶行为:无，异常驾驶行为：无，道路熟悉程度：不熟悉 """
 
-response = client.chat.completions.create(
-    # model="deepseek-reasoner",
+# 调用 ChatCompletion API
+response = openai.ChatCompletion.create(
     model="deepseek-chat",
     messages=[
         {"role": "system", "content": content},
-        {"role": "user", "content": message},
+        {"role": "user", "content": message}
     ],
-    temperature=0.2,   # 控制输出的多样性，0 到 2，越高越随机
-    top_p=0.2,         # nucleus sampling，取前p累计概率内的词
-    max_tokens=512,    # 最多生成多少token
-    stream=False
+    temperature=0.2,
+    top_p=0.2,
+    max_tokens=512
 )
 
-print(response.choices[0].message.content)
+# 打印生成结果
+print(response['choices'][0]['message']['content'])
